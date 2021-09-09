@@ -1,18 +1,11 @@
-"""Support for Template vacuums."""
+"""Support for Ikohs S15 vacuums."""
 import logging
-
+from Ikohs import Ikohs
 import voluptuous as vol
 
 from homeassistant.components.vacuum import (
     ATTR_FAN_SPEED,
     DOMAIN as VACUUM_DOMAIN,
-    SERVICE_CLEAN_SPOT,
-    SERVICE_LOCATE,
-    SERVICE_PAUSE,
-    SERVICE_RETURN_TO_BASE,
-    SERVICE_SET_FAN_SPEED,
-    SERVICE_START,
-    SERVICE_STOP,
     STATE_CLEANING,
     STATE_DOCKED,
     STATE_ERROR,
@@ -22,7 +15,6 @@ from homeassistant.components.vacuum import (
     SUPPORT_BATTERY,
     SUPPORT_CLEAN_SPOT,
     SUPPORT_FAN_SPEED,
-    SUPPORT_LOCATE,
     SUPPORT_PAUSE,
     SUPPORT_RETURN_HOME,
     SUPPORT_START,
@@ -33,8 +25,6 @@ from homeassistant.components.vacuum import (
 from homeassistant.const import (
     CONF_ENTITY_ID,
     CONF_FRIENDLY_NAME,
-    CONF_UNIQUE_ID,
-    CONF_VALUE_TEMPLATE,
     STATE_UNKNOWN,
 )
 from homeassistant.core import callback
@@ -67,25 +57,10 @@ _VALID_STATES = [
 VACUUM_SCHEMA = vol.All(
     cv.deprecated(CONF_ENTITY_ID),
     vol.Schema(
-        {
+        {   
+            vol.Required("username"): cv.string,
+            vol.Required("password"): cv.string,
             vol.Optional(CONF_FRIENDLY_NAME): cv.string,
-            vol.Optional(CONF_VALUE_TEMPLATE): cv.template,
-            vol.Optional(CONF_BATTERY_LEVEL_TEMPLATE): cv.template,
-            vol.Optional(CONF_FAN_SPEED_TEMPLATE): cv.template,
-            vol.Optional(CONF_AVAILABILITY_TEMPLATE): cv.template,
-            vol.Optional(CONF_ATTRIBUTE_TEMPLATES, default={}): vol.Schema(
-                {cv.string: cv.template}
-            ),
-            vol.Required(SERVICE_START): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_PAUSE): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_STOP): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_RETURN_TO_BASE): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_CLEAN_SPOT): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_LOCATE): cv.SCRIPT_SCHEMA,
-            vol.Optional(SERVICE_SET_FAN_SPEED): cv.SCRIPT_SCHEMA,
-            vol.Optional(CONF_FAN_SPEED_LIST, default=[]): cv.ensure_list,
-            vol.Optional(CONF_ENTITY_ID): cv.entity_ids,
-            vol.Optional(CONF_UNIQUE_ID): cv.string,
         }
     ),
 )
@@ -96,48 +71,29 @@ PLATFORM_SCHEMA = cv.PLATFORM_SCHEMA.extend(
 
 
 async def _async_create_entities(hass, config):
-    """Create the Template Vacuums."""
-    vacuums = []
+    """Create the Ikohs Vacuums."""
 
+
+
+    vacuums = []
     for device, device_config in config[CONF_VACUUMS].items():
         friendly_name = device_config.get(CONF_FRIENDLY_NAME, device)
+        username = device_config.get("username")
+        password = device_config.get("password")
 
-        state_template = device_config.get(CONF_VALUE_TEMPLATE)
-        battery_level_template = device_config.get(CONF_BATTERY_LEVEL_TEMPLATE)
-        fan_speed_template = device_config.get(CONF_FAN_SPEED_TEMPLATE)
-        availability_template = device_config.get(CONF_AVAILABILITY_TEMPLATE)
-        attribute_templates = device_config.get(CONF_ATTRIBUTE_TEMPLATES)
-
-        start_action = device_config[SERVICE_START]
-        pause_action = device_config.get(SERVICE_PAUSE)
-        stop_action = device_config.get(SERVICE_STOP)
-        return_to_base_action = device_config.get(SERVICE_RETURN_TO_BASE)
-        clean_spot_action = device_config.get(SERVICE_CLEAN_SPOT)
-        locate_action = device_config.get(SERVICE_LOCATE)
-        set_fan_speed_action = device_config.get(SERVICE_SET_FAN_SPEED)
-
-        fan_speed_list = device_config[CONF_FAN_SPEED_LIST]
-        unique_id = device_config.get(CONF_UNIQUE_ID)
+        ikhos = Ikohs({'username': username, 'password': password})
+        vacuum = ikhos.getVacuum()
 
         vacuums.append(
-            TemplateVacuum(
+            IkohsVacuum(
                 hass,
                 device,
                 friendly_name,
-                state_template,
-                battery_level_template,
-                fan_speed_template,
-                availability_template,
-                start_action,
-                pause_action,
-                stop_action,
-                return_to_base_action,
-                clean_spot_action,
-                locate_action,
-                set_fan_speed_action,
-                fan_speed_list,
-                attribute_templates,
-                unique_id,
+                vacuum['working_status'],
+                vacuum['battery_level'],
+                vacuum['fan_status'],
+                vacuum['connected'],
+                vacuum['thingId'],
             )
         )
 
@@ -149,7 +105,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(await _async_create_entities(hass, config))
 
 
-class TemplateVacuum(TemplateEntity, StateVacuumEntity):
+class IkohsVacuum(StateVacuumEntity):
     """A template vacuum component."""
 
     def __init__(
@@ -161,15 +117,6 @@ class TemplateVacuum(TemplateEntity, StateVacuumEntity):
         battery_level_template,
         fan_speed_template,
         availability_template,
-        start_action,
-        pause_action,
-        stop_action,
-        return_to_base_action,
-        clean_spot_action,
-        locate_action,
-        set_fan_speed_action,
-        fan_speed_list,
-        attribute_templates,
         unique_id,
     ):
         """Initialize the vacuum."""
@@ -239,7 +186,7 @@ class TemplateVacuum(TemplateEntity, StateVacuumEntity):
         self._unique_id = unique_id
 
         # List of valid fan speeds
-        self._fan_speed_list = fan_speed_list
+        self._fan_speed_list = ["Normal", "Strong"]
 
     @property
     def name(self):

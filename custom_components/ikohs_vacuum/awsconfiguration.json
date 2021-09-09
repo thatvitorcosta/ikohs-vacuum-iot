@@ -1,0 +1,46 @@
+{
+  "UserAgent": "MobileHub/1.0",
+  "Version": "1.0",
+  "CredentialsProvider": {
+    "CognitoIdentity": {
+      "Default": {
+        "PoolId": "eu-central-1:d297d27e-a693-4f36-9de6-d74244e812ee",
+        "Region": "eu-central-1"
+      }
+    }
+  },
+  "IdentityManager": {
+    "Default": {}
+  },
+  "CognitoUserPool": {
+    "Default": {
+      "PoolId": "eu-central-1_kZO9vyiK7",
+      "AppClientId": "1temi4s8l4dh32u28bdf67hpg7",
+      "AppClientSecret": "11glcfuvp01r191pc6f2mghtj5ld2boc158ipb66iofav0e1nd6f",
+      "Region": "eu-central-1"
+    }
+  },
+  "S3TransferUtility": {
+    "Default": {
+      "Bucket": "ikohsmobilefrankfurt-userfiles-mobilehub-2142997605",
+      "Region": "eu-central-1"
+    }
+  },
+  "PinpointAnalytics": {
+    "Default": {
+      "AppId": "128d1f75d5204475a70ca371ba47b055",
+      "Region": "us-east-1"
+    }
+  },
+  "PinpointTargeting": {
+    "Default": {
+      "Region": "us-east-1"
+    }
+  },
+  "UserFileManager": {
+    "Default": {
+      "Bucket": "ikohsmobilefrankfurt-userfiles-mobilehub-2142997605",
+      "Region": "eu-central-1"
+    }
+  }
+}
