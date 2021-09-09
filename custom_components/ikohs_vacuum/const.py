@@ -1,0 +1,1 @@
+DOMAIN = "ikohs_vacuum"
