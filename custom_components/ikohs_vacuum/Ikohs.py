@@ -3,7 +3,24 @@ from pycognito.aws_srp import AWSSRP
 
 class Ikohs:
 
-    AWS = {}
+    AWS = {
+        "CredentialsProvider": {
+            "CognitoIdentity": {
+            "Default": {
+                "PoolId": "eu-central-1:d297d27e-a693-4f36-9de6-d74244e812ee",
+                "Region": "eu-central-1"
+            }
+            }
+        },
+        "CognitoUserPool": {
+            "Default": {
+            "PoolId": "eu-central-1_kZO9vyiK7",
+            "AppClientId": "1temi4s8l4dh32u28bdf67hpg7",
+            "AppClientSecret": "11glcfuvp01r191pc6f2mghtj5ld2boc158ipb66iofav0e1nd6f",
+            "Region": "eu-central-1"
+            }
+        }
+    }
     UserAuth = {}
     currentConfig = {
         'AccessToken': '',
@@ -17,8 +34,6 @@ class Ikohs:
 
     def __init__(self, auth):
         self.UserAuth = auth
-        with open('./awsconfiguration.json') as f:
-            self.AWS = json.load(f)
         self.config = configparser.ConfigParser()
         self.config.read('ikhos.ini')
         if not self.config.has_section(self.UserAuth['username']):
