@@ -30,7 +30,7 @@ from homeassistant.const import (
 from homeassistant.core import callback
 from homeassistant.exceptions import TemplateError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity import async_generate_entity_id
+from homeassistant.helpers.entity import generate_entity_id
 from homeassistant.helpers.script import Script
 
 
@@ -68,7 +68,7 @@ PLATFORM_SCHEMA = cv.PLATFORM_SCHEMA.extend(
 )
 
 
-async def _async_create_entities(hass, config):
+def _create_entities(hass, config):
     """Create the Ikohs Vacuums."""
 
 
@@ -98,9 +98,9 @@ async def _async_create_entities(hass, config):
     return vacuums
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the template vacuums."""
-    async_add_entities(await _async_create_entities(hass, config))
+    add_entities(_create_entities(hass, config))
 
 
 class IkohsVacuum(StateVacuumEntity):
@@ -122,7 +122,7 @@ class IkohsVacuum(StateVacuumEntity):
             attribute_templates=attribute_templates,
             availability_template=availability_template,
         )
-        self.entity_id = async_generate_entity_id(
+        self.entity_id = generate_entity_id(
             ENTITY_ID_FORMAT, device_id, hass=hass
         )
         self._name = friendly_name
@@ -221,53 +221,53 @@ class IkohsVacuum(StateVacuumEntity):
         """Get the list of available fan speeds."""
         return self._fan_speed_list
 
-    async def async_start(self):
+    def start(self):
         """Start or resume the cleaning task."""
-        await self._start_script.async_run(context=self._context)
+        self._start_script.run(context=self._context)
 
-    async def async_pause(self):
+    def pause(self):
         """Pause the cleaning task."""
         if self._pause_script is None:
             return
 
-        await self._pause_script.async_run(context=self._context)
+        self._pause_script.run(context=self._context)
 
-    async def async_stop(self, **kwargs):
+    def stop(self, **kwargs):
         """Stop the cleaning task."""
         if self._stop_script is None:
             return
 
-        await self._stop_script.async_run(context=self._context)
+        self._stop_script.run(context=self._context)
 
-    async def async_return_to_base(self, **kwargs):
+    def return_to_base(self, **kwargs):
         """Set the vacuum cleaner to return to the dock."""
         if self._return_to_base_script is None:
             return
 
-        await self._return_to_base_script.async_run(context=self._context)
+        self._return_to_base_script.run(context=self._context)
 
-    async def async_clean_spot(self, **kwargs):
+    def clean_spot(self, **kwargs):
         """Perform a spot clean-up."""
         if self._clean_spot_script is None:
             return
 
-        await self._clean_spot_script.async_run(context=self._context)
+        self._clean_spot_script.run(context=self._context)
 
-    async def async_locate(self, **kwargs):
+    def locate(self, **kwargs):
         """Locate the vacuum cleaner."""
         if self._locate_script is None:
             return
 
-        await self._locate_script.async_run(context=self._context)
+        self._locate_script.run(context=self._context)
 
-    async def async_set_fan_speed(self, fan_speed, **kwargs):
+    def set_fan_speed(self, fan_speed, **kwargs):
         """Set fan speed."""
         if self._set_fan_speed_script is None:
             return
 
         if fan_speed in self._fan_speed_list:
             self._fan_speed = fan_speed
-            await self._set_fan_speed_script.async_run(
+            self._set_fan_speed_script.run(
                 {ATTR_FAN_SPEED: fan_speed}, context=self._context
             )
         else:
@@ -277,7 +277,7 @@ class IkohsVacuum(StateVacuumEntity):
                 self._fan_speed_list,
             )
 
-    async def async_added_to_hass(self):
+    def added_to_hass(self):
         """Register callbacks."""
         if self._template is not None:
             self.add_template_attribute(
@@ -298,7 +298,7 @@ class IkohsVacuum(StateVacuumEntity):
                 self._update_battery_level,
                 none_on_template_error=True,
             )
-        await super().async_added_to_hass()
+        super().added_to_hass()
 
     @callback
     def _update_state(self, result):
