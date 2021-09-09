@@ -1,6 +1,6 @@
 """Support for Ikohs S15 vacuums."""
 import logging
-from Ikohs import Ikohs
+from Ikohs import *
 import voluptuous as vol
 
 from homeassistant.components.vacuum import (
