@@ -37,11 +37,11 @@ class Ikohs:
         self.config = configparser.ConfigParser()
         self.config.read('ikhos.ini')
         if not self.config.has_section(self.UserAuth['username']):
-            self.authenticate();
+            self.authenticateAWS();
         else:
             self.currentConfig = self.config[self.UserAuth['username']]    
     
-    def authenticate(self):
+    def authenticateAWS(self):
         client = boto3.client('cognito-idp', region_name=self.AWS["CognitoUserPool"]["Default"]["Region"])
         aws = AWSSRP(username=self.UserAuth["username"], password=self.UserAuth["password"], pool_id=self.AWS["CognitoUserPool"]["Default"]["PoolId"],
                     client_id=self.AWS["CognitoUserPool"]["Default"]["AppClientId"], client_secret=self.AWS["CognitoUserPool"]["Default"]["AppClientSecret"], client=client)
