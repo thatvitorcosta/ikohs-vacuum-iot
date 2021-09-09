@@ -1,7 +1,7 @@
 {
   "codeowners": ["thatvitorcosta"],
   "config_flow": true,
-  "dependencies": ["boto3", "pycognito"],
+  "dependencies": [],
   "documentation": "https://github.com/thatvitorcosta/ikohs-vacuum-iot",
   "domain": "ikohs_vacuum",
   "iot_class": "cloud_polling",
