@@ -17,7 +17,7 @@ class Ikohs:
 
     def __init__(self, auth):
         self.UserAuth = auth
-        with open('awsconfiguration.json') as f:
+        with open('./awsconfiguration.json') as f:
             self.AWS = json.load(f)
         self.config = configparser.ConfigParser()
         self.config.read('ikhos.ini')
